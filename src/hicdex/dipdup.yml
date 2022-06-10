@@ -1,6 +1,12 @@
-spec_version: 1.1
+spec_version: 1.2
 package: hicdex
 
+advanced:
+  early_realtime: True
+  reindex:
+    manual: ignore
+    schema_modified: ignore
+    
 database:
   kind: sqlite
   path: hic_et_nunc.sqlite3
@@ -39,6 +45,9 @@ contracts:
   SPLIT_contract_sample_d:
     address: KT1XNKmW2786FRK9rGr544JYcmLvcvwn3qEV
     typename: split_contract_a
+  SPLIT_contract_sample_e:
+    address: KT1NcoBQJ5PbGNWCcchhKeYdopvmvugZdeCg
+    typename: split_contract_b
   SPLIT_sign:
     address: KT1BcLnWRziLDNJNRn3phAANKrEBiXhytsMY
     typename: split_sign
@@ -65,6 +74,7 @@ datasources:
   tzkt_mainnet:
     kind: tzkt
     url: https://api.tzkt.io
+    buffer_size: 2
 
 indexes:
   hen_mainnet:
@@ -215,4 +225,15 @@ indexes:
         pattern:
           - type: origination
             similar_to: SPLIT_contract_sample_d
-    stateless: True
+
+  split_contract_b:
+    kind: operation
+    datasource: tzkt_mainnet
+    types:
+      - transaction
+      - origination
+    handlers:
+      - callback: on_split_contract_origination_a
+        pattern:
+          - type: origination
+            similar_to: SPLIT_contract_sample_e

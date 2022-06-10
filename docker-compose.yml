@@ -9,8 +9,9 @@ services:
       - ./src/hicdex:/home/dipdup/source/src/hicdex
       - ./src/hicdex/dipdup.yml:/home/dipdup/dipdup.yml
       - ./src/hicdex/dipdup-docker.yml:/home/dipdup/dipdup-docker.yml
-      - /foo/hicdex-metadata:/home/dipdup/metadata
+      - ./data/hicdex-metadata:/home/dipdup/metadata
     command: ["-c", "dipdup.yml", "-c", "dipdup-docker.yml", "run"]
+    #command: ["schema", "approve"]
     restart: always
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
@@ -25,19 +26,19 @@ services:
       - 6423:5432
     restart: always
     volumes:
-      - /foo/pg:/var/lib/postgresql/data
+      - ./data/pg:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=dipdup
       - POSTGRES_DB=dipdup
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U dipdup"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   hasura:
-    image: hasura/graphql-engine:v2.0.1
+    image: hasura/graphql-engine:latest
     # ports:
     #   - 8081:8080
     expose:
@@ -58,7 +59,7 @@ services:
     restart: always
     user: postgres:postgres # Optional: see below
     volumes:
-      - /foo/backups:/backups
+      - ./data/backups:/backups
     links:
       - db
     depends_on:
@@ -72,7 +73,7 @@ services:
       - POSTGRES_DB=dipdup
       - POSTGRES_USER=dipdup
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - POSTGRES_EXTRA_OPTS=-Z6 --clean --schema=hic_et_nunc --blobs
+      - POSTGRES_EXTRA_OPTS=-Z6 --clean --schema=public --blobs
       - SCHEDULE=*/30 * * * *
       - BACKUP_KEEP_DAYS=7
       - BACKUP_KEEP_WEEKS=4
